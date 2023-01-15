@@ -1,0 +1,52 @@
+html{
+  height: 100%;
+}
+
+body{
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  text-align: center;
+  color: black;
+}
+.App{
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.nav {
+  background-color: #828282;
+}
+
+
+.page-root{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+}
+
+.canvas{
+  height: 500px;
+  width: 500px;
+  background-color: white;
+  margin: 5px;
+}
+
+.control {
+  height: 3em;
+  width: 500px;
+  margin: 5px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
