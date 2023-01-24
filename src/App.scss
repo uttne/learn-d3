@@ -24,7 +24,12 @@ body{
   background-color: #828282;
   display: flex;
   flex-flow: column;
+
+  & a {
+    color: white;
+  }
 }
+
 
 
 .page-root{

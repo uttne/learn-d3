@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./App.css";
+import "./App.scss";
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Home } from "./pages/Home";
 import { L001 } from "./pages/L001";
