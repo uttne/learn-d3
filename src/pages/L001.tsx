@@ -30,7 +30,7 @@ function getChain<TTag extends keyof ElementTagNameMap, TData>(
 
 const svgWidth = 500;
 const svgHeight = 500;
-const dataCount = 5000;
+const dataCount = 1000;
 
 export function L001() {
   const [reloadCount, setReloadCount] = useState(0);
