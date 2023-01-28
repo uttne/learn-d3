@@ -28,9 +28,6 @@ export function L002() {
       .attr("height", svgHeight);
   }, []);
 
-  // data の生成
-  const data = useMemo(() => Array(dataCount).map((_, i) => i), []);
-
   useEffect(() => {
     const c = canvas.current;
     if (!c) return;
@@ -41,57 +38,95 @@ export function L002() {
 
     const radius = 20;
 
-    const circles = d3.range(324).map((i) => ({
-      x: (i % 25) * (radius + 1) * 2,
-      y: Math.floor(1 / 25) * (radius + 1) * 2,
-    }));
+    // d3.js で使用するデータをここで作成する
+    const circleCenterDatas = d3
+      .range((svgWidth / radius) * (svgHeight / radius))
+      .map((i) => ({
+        x: (i % 25) * (radius + 1) * 2,
+        y: Math.floor(i / 25) * (radius + 1) * 2,
+      }));
 
     const drawCircle = (d: { x: number; y: number }) => {
-      context.moveTo(d.x + radius, d.y);
+      // 1つ1つへの円の色を変えるためにここで beginPath を実行する
+      context.beginPath();
+
+      // 特に色を変える必要がないサンプルではパスの開始位置を移動する moveTo をつかっていた
+      // パスの開始時点を移動する
+      // これをしないと円のパスが全てつながってしまう
+      // context.moveTo(d.x + radius, d.y);
+
+      // x軸を起点に円を描画する
+      // context.arc(中心のx, 中心のy, 半径, 開始角度, 終了角度, [回転方向: true は反時計回り])
       context.arc(d.x, d.y, radius, 0, 2 * Math.PI);
+      context.arc(d.x, d.y, radius, 0, 2 * Math.PI);
+
+      // fx が指定されいている = ドラッグしているものの色を変える
+      if ((d as any).fx != null) {
+        context.fillStyle = "#f00";
+      } else {
+        context.fillStyle = "#000";
+      }
+      // 色を塗る
+      context.fill();
+
+      // ストロークを塗る
+      context.stroke();
     };
     const drawCircles = () => {
+      // キャンパスを白紙に戻す
       context.clearRect(0, 0, svgWidth, svgHeight);
       context.save();
       context.beginPath();
-      circles.forEach(drawCircle);
-      context.fill();
-      context.strokeStyle = "#fff";
-      context.stroke();
+
+      // 円を描画する
+      circleCenterDatas.forEach(drawCircle);
     };
     const simulation = d3
-      .forceSimulation(circles)
+      .forceSimulation(circleCenterDatas)
+      // 力を設定する
       .force("collide", d3.forceCollide(radius + 1).iterations(4))
+      // tick でシミュレーションを開始する
+      // 設定した関数をアニメーションする速度で呼び出す
       .on("tick", drawCircles);
 
     const dragsubject = (e: any) => {
+      // simulation.find で指定した場所にあるノードを見つけ返すことができる
+      // 見つけたノードは drag などのイベントの e.subject に代入される
       return simulation.find(e.x, e.y, radius);
     };
     const dragstarted = (e: any) => {
       if (!e.active) simulation.alphaTarget(0.3).restart();
+
       e.subject.fx = e.subject.x;
       e.subject.fy = e.subject.y;
     };
     const dragged = (e: any) => {
+      // https://github.com/d3/d3-force#simulation_nodes
+      // fx, fy は d3.js で追加されるプロパティ
+      // f は fixed の略なので固定という意味になる
+      // x や y を変更してしまうとシミュレーションが動かした物体にも作用してしまい、挙動がおかしくなるので
+      // fx, fy で位置を固定しながら動かす
       e.subject.fx = e.x;
       e.subject.fy = e.y;
     };
     const dragended = (e: any) => {
       if (!e.active) simulation.alphaTarget(0);
+
+      // ドラッグが終わったら fx, fy をnullにして再び動くようにする
       e.subject.fx = null;
       e.subject.fy = null;
     };
 
-    // any にしてしまったが型をきちんと確認する
-    const callhandler: any = d3
-      .drag()
+    const callhandler = d3
+      .drag<HTMLCanvasElement, unknown>()
       .container(canvasNode)
       .subject(dragsubject)
       .on("start", dragstarted)
       .on("drag", dragged)
       .on("end", dragended);
+
     c.call(callhandler);
-  }, [reloadCount, data]);
+  }, [reloadCount]);
 
   return (
     <div className="page-root">
